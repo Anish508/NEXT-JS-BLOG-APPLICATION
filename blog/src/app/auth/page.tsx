@@ -1,3 +1,5 @@
-export default function authPage() {
-  return <div>auth page</div>;
+import AuthLayout from "./auth-layout";
+
+export default function AuthPage() {
+  return <AuthLayout />;
 }
