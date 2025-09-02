@@ -1,9 +1,20 @@
 import { betterAuth } from "better-auth";
-
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import * as schema from "./db/schema";
+import { db } from "./db";
 export const auth = betterAuth({
   appName: "My App",
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BASE_URL,
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      ...schema,
+      user: schema.users,
+      session: schema.session,
+      account: schema.account,
+    },
+  }),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
