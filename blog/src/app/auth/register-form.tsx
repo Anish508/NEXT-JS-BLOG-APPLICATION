@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { signUp } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const registerSchema = z
   .object({
     name: string().min(3, "name must be at least 3 chars"),
-    email: z.string().email("Please enter a valid email address!"),
+    email: z.email("Please enter a valid email address!"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
     confirmPassword: z
       .string()
@@ -30,7 +32,11 @@ const registerSchema = z
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  onSuccess?: () => void;
+}
+
+export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<RegisterValues>({
@@ -46,7 +52,21 @@ export default function RegisterForm() {
   async function onSubmit(values: RegisterValues) {
     setIsLoading(true);
     try {
-      console.log("Form Submitted:", values);
+      const { error } = await signUp.email({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
+      if (error) {
+        toast("Failed to create account. Please try again");
+        return;
+      }
+      toast(
+        "Your account has been created successfully. please sign up with email and password"
+      );
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error(error);
     } finally {
