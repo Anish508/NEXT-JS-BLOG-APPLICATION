@@ -5,8 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Menu, X, Search, Sun, Moon } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import UserMenu from "@/app/auth/user-menu";
 
 function Header() {
+  const { data: session, isPending } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
@@ -87,13 +90,17 @@ function Header() {
           </button>
 
           {/* Auth Button */}
-          <Button
-            size="sm"
-            className="hidden sm:inline-flex"
-            onClick={() => router.push("/auth")}
-          >
-            Sign In
-          </Button>
+          {isPending ? null : session?.user ? (
+            <UserMenu />
+          ) : (
+            <Button
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => router.push("/auth")}
+            >
+              Sign In
+            </Button>
+          )}
 
           {/* Mobile Menu Button */}
           <button
