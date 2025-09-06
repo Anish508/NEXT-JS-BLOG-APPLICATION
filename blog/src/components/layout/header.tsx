@@ -91,7 +91,7 @@ function Header() {
 
           {/* Auth Button */}
           {isPending ? null : session?.user ? (
-            <UserMenu />
+            <UserMenu user={session.user} />
           ) : (
             <Button
               size="sm"
