@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { useThemeStore } from "@/store/theme";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,20 @@ import { useSession } from "@/lib/auth-client";
 import UserMenu from "@/app/auth/user-menu";
 
 function Header() {
+  const { theme, toggleTheme, initializeTheme } = useThemeStore();
+
+  useEffect(() => {
+    initializeTheme();
+    // Listen to system theme changes
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => {
+      if (!window.localStorage.getItem("theme")) {
+        initializeTheme();
+      }
+    };
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, [initializeTheme]);
   const { data: session, isPending } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -84,9 +98,13 @@ function Header() {
           <button
             aria-label="Toggle theme"
             className="p-2 rounded-lg hover:bg-muted transition-colors"
+            onClick={toggleTheme}
           >
-            <Sun className="h-5 w-5 hidden dark:block" />
-            <Moon className="h-5 w-5 block dark:hidden" />
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
 
           {/* Auth Button */}
