@@ -1,28 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useThemeStore } from "@/store/theme";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Menu, X, Search, Sun, Moon } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import UserMenu from "@/app/auth/user-menu";
+import ThemeToggle from "../theme/theme-toggle";
 
 function Header() {
-  const { theme, toggleTheme, initializeTheme } = useThemeStore();
-
-  useEffect(() => {
-    initializeTheme();
-    // Listen to system theme changes
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      if (!window.localStorage.getItem("theme")) {
-        initializeTheme();
-      }
-    };
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
-  }, [initializeTheme]);
   const { data: session, isPending } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -95,18 +81,7 @@ function Header() {
           </div>
 
           {/* Theme toggle */}
-          <button
-            aria-label="Toggle theme"
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-            onClick={toggleTheme}
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </button>
-
+          <ThemeToggle></ThemeToggle>
           {/* Auth Button */}
           {isPending ? null : session?.user ? (
             <UserMenu user={session.user} />
