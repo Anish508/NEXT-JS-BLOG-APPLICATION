@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTransition } from "react";
+import { createPost } from "@/actions/post-actions";
 const postSchema = z.object({
   title: z
     .string()
@@ -40,10 +41,34 @@ function PostForm() {
     },
   });
 
-  const [isPending, startTranistion] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const onFormSubmit = async (data: postFormValues) => {
-    console.log(data);
+    console.log("Form data:", data);
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("description", data.description);
+        formData.append("content", data.content);
+
+        const res = await createPost(formData);
+
+        console.log("Result:", res);
+
+        if (!res.success) {
+          // Show error feedback to user
+          alert(res.message);
+        } else {
+          // Redirect or show success message
+          alert("✅ Post created successfully!");
+        }
+      } catch (error) {
+        console.error("Error while sending form:", error);
+        alert("Something went wrong while submitting the form.");
+      }
+    });
   };
   return (
     <form action="" className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>

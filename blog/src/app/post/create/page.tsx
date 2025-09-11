@@ -1,12 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-  CardDescription,
-  CardTitle,
-  CardAction,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import PostForm from "@/components/post/page";
 function createPost() {
   return (
