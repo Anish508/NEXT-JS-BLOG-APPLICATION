@@ -8,6 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTransition } from "react";
 import { createPost } from "@/actions/post-actions";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 const postSchema = z.object({
   title: z
     .string()
@@ -28,6 +30,7 @@ const postSchema = z.object({
 type postFormValues = z.infer<typeof postSchema>;
 
 function PostForm() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -59,14 +62,16 @@ function PostForm() {
 
         if (!res.success) {
           // Show error feedback to user
-          alert(res.message);
+          toast(res.message);
         } else {
           // Redirect or show success message
-          alert("✅ Post created successfully!");
+          toast("✅ Post created successfully!");
+          router.refresh();
+          router.push("/");
         }
       } catch (error) {
         console.error("Error while sending form:", error);
-        alert("Something went wrong while submitting the form.");
+        toast("Something went wrong while submitting the form.");
       }
     });
   };
