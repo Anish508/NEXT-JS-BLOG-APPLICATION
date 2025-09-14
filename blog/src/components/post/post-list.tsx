@@ -1,9 +1,13 @@
+// src/components/post/post-list.tsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import type { Post } from "@/types";
 
-export default function PostList({ posts }: { posts: any[] }) {
+export default function PostList({ posts }: { posts: Post[] }) {
+  if (!posts?.length) return null;
+
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {posts.map((post) => (
@@ -14,19 +18,19 @@ export default function PostList({ posts }: { posts: any[] }) {
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               <Link
-                href={`/post/${post.id}`}
+                href={`/post/${post.slug ?? post.id}`}
                 className="hover:text-blue-600 transition-colors"
               >
-                {post.title}
+                {post.title ?? "Untitled Post"}
               </Link>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 line-clamp-3">
-              {post.content || "No content available"}
+              {post.content ?? "No content available"}
             </p>
             <div className="mt-4 text-sm text-gray-500">
-              By {post.author?.name || "Unknown"} •{" "}
+              By {post.author?.name ?? "Unknown"} •{" "}
               {new Date(post.createdAt).toLocaleDateString()}
             </div>
           </CardContent>

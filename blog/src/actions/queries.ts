@@ -1,19 +1,30 @@
-"use server";
+// actions/queries.ts (or wherever getAllPost is)
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
+import type { Post } from "@/types";
 
 export async function getAllPost(): Promise<Post[]> {
   try {
-    const getAllPosts = await db.query.posts.findMany({
+    const rows = await db.query.posts.findMany({
       orderBy: [desc(posts.createdAt)],
-      with: {
-        author: true,
-      },
+      with: { author: true },
     });
-    return getAllPosts ?? [];
+
+    return (rows ?? []).map((r) => ({
+      ...r,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+      author: r.author
+        ? {
+            ...r.author,
+            createdAt: r.author.createdAt.toISOString(),
+            updatedAt: r.author.updatedAt.toISOString(),
+          }
+        : null,
+    }));
   } catch (error) {
-    console.log("Error while getting all posts:", error);
+    console.error("Error while getting all posts:", error);
     return [];
   }
 }

@@ -1,7 +1,9 @@
+// src/app/page.tsx
 import { getAllPost } from "@/actions/queries";
 import PostList from "@/components/post/post-list";
 import { Metadata } from "next";
 import Link from "next/link";
+import type { Post } from "@/types";
 
 export const metadata: Metadata = {
   title: "Next-Js Blog Application",
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const posts = await getAllPost();
+  const posts: Post[] = await getAllPost();
 
   return (
     <main className="py-10">
