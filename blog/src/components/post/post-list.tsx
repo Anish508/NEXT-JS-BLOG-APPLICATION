@@ -18,7 +18,7 @@ export default function PostList({ posts }: { posts: Post[] }) {
           <CardHeader>
             <CardTitle className="text-xl font-semibold">
               <Link
-                href={`/post/${post.slug ?? post.id}`}
+                href={`/post/${post.slug}`}
                 className="hover:text-blue-600 transition-colors"
               >
                 {post.title ?? "Untitled Post"}

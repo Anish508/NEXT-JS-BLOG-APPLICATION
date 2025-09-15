@@ -1,7 +1,7 @@
 // actions/queries.ts (or wherever getAllPost is)
 import { db } from "@/lib/db";
 import { posts } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import type { Post } from "@/types";
 
 export async function getAllPost(): Promise<Post[]> {
@@ -26,5 +26,20 @@ export async function getAllPost(): Promise<Post[]> {
   } catch (error) {
     console.error("Error while getting all posts:", error);
     return [];
+  }
+}
+
+export async function getPostsBySlug(slug: string) {
+  try {
+    const post = await db.query.posts.findFirst({
+      where: eq(posts.slug, slug),
+      with: {
+        author: true,
+      },
+    });
+    return post;
+  } catch (error) {
+    console.log("Error while fetching post detail:", error);
+    return null;
   }
 }
