@@ -10,14 +10,13 @@ import { revalidatePath } from "next/cache";
 export async function createPost(formData: FormData) {
   try {
     const session = await auth.api.getSession({
-      headers: await headers(), // safer than await headers()
+      headers: await headers(),
     });
 
     if (!session || !session?.user) {
       return { success: false, message: "You must be logged in" };
     }
 
-    // extract + validate
     const title = (formData.get("title") as string)?.trim();
     const description = (formData.get("description") as string)?.trim();
     const content = (formData.get("content") as string)?.trim();
@@ -35,7 +34,7 @@ export async function createPost(formData: FormData) {
     if (existingPost) {
       return {
         success: false,
-        message: "A Post with same title already exists",
+        message: "A post with the same title already exists",
       };
     }
 
@@ -54,7 +53,6 @@ export async function createPost(formData: FormData) {
       return { success: false, message: "Post was not created" };
     }
 
-    // revalidate cache
     revalidatePath("/");
     revalidatePath(`/post/${slug}`);
     revalidatePath("/profile");
@@ -68,5 +66,74 @@ export async function createPost(formData: FormData) {
   } catch (error) {
     console.error("Error while creating a post:", error);
     return { success: false, message: "Failed to create a post" };
+  }
+}
+
+export async function updatePost(formData: FormData) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || !session.user) {
+      return {
+        success: false,
+        message: "You must be logged in to edit a post",
+      };
+    }
+
+    const id = Number(formData.get("id"));
+    const title = (formData.get("title") as string)?.trim();
+    const description = (formData.get("description") as string)?.trim();
+    const content = (formData.get("content") as string)?.trim();
+
+    if (!id || !title || !description || !content) {
+      return { success: false, message: "Fill all the data properly" };
+    }
+
+    // fetch post
+    const existingPost = await db.query.posts.findFirst({
+      where: eq(posts.id, id),
+    });
+
+    if (!existingPost) {
+      return { success: false, message: "Post not found" };
+    }
+
+    if (existingPost.authorId !== session.user.id) {
+      return { success: false, message: "Not authorized to edit this post" };
+    }
+
+    const slug = slugify(title);
+
+    const [updatedPost] = await db
+      .update(posts)
+      .set({
+        title,
+        description,
+        content,
+        slug,
+      })
+      .where(eq(posts.id, id))
+      .returning();
+
+    if (!updatedPost) {
+      return { success: false, message: "Post was not updated" };
+    }
+
+    // revalidate updated paths
+    revalidatePath("/");
+    revalidatePath(`/post/${slug}`);
+    revalidatePath("/profile");
+
+    return {
+      success: true,
+      message: "Post updated successfully",
+      slug,
+      data: updatedPost,
+    };
+  } catch (error) {
+    console.error("Error while updating post:", error);
+    return { success: false, message: "Failed to update the post" };
   }
 }

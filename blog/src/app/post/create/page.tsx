@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import PostForm from "@/components/post/page";
+import PostForm from "@/components/post/post-form";
 function createPost() {
   return (
     <main className="py-10">

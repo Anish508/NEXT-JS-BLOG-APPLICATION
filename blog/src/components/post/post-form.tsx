@@ -7,9 +7,10 @@ import { Button } from "../ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTransition } from "react";
-import { createPost } from "@/actions/post-actions";
+import { createPost, updatePost } from "@/actions/post-actions"; // ✅ Add updatePost
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+
 const postSchema = z.object({
   title: z
     .string()
@@ -27,28 +28,40 @@ const postSchema = z.object({
     .max(600, "Content must be less than 600 characters"),
 });
 
-type postFormValues = z.infer<typeof postSchema>;
+type PostFormValues = z.infer<typeof postSchema>;
 
-function PostForm() {
+interface PostFormProps {
+  isEditing?: boolean;
+  post?: {
+    id: number;
+    title: string;
+    content: string;
+    description: string;
+    slug: string;
+  };
+}
+
+function PostForm({ isEditing, post }: PostFormProps) {
   const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<postFormValues>({
+  } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      content: "",
-    },
+    defaultValues:
+      isEditing && post
+        ? {
+            title: post.title,
+            description: post.description,
+            content: post.content,
+          }
+        : {},
   });
 
   const [isPending, startTransition] = useTransition();
 
-  const onFormSubmit = async (data: postFormValues) => {
-    console.log("Form data:", data);
-
+  const onFormSubmit = async (data: PostFormValues) => {
     startTransition(async () => {
       try {
         const formData = new FormData();
@@ -56,27 +69,34 @@ function PostForm() {
         formData.append("description", data.description);
         formData.append("content", data.content);
 
-        const res = await createPost(formData);
-
-        console.log("Result:", res);
+        let res;
+        if (isEditing && post) {
+          formData.append("id", String(post.id));
+          res = await updatePost(formData);
+        } else {
+          res = await createPost(formData);
+        }
 
         if (!res.success) {
-          // Show error feedback to user
           toast(res.message);
         } else {
-          // Redirect or show success message
-          toast("✅ Post created successfully!");
+          toast(
+            isEditing
+              ? "✅ Post updated successfully!"
+              : "✅ Post created successfully!"
+          );
           router.refresh();
           router.push("/");
         }
       } catch (error) {
-        console.error("Error while sending form:", error);
-        toast("Something went wrong while submitting the form.");
+        console.error("Error while submitting form:", error);
+        toast("❌ Something went wrong.");
       }
     });
   };
+
   return (
-    <form action="" className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
+    <form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input
@@ -84,11 +104,12 @@ function PostForm() {
           placeholder="Enter your title"
           {...register("title")}
           disabled={isPending}
-        ></Input>
+        />
         {errors?.title && (
           <p className="text-sm text-red-700">{errors.title.message}</p>
         )}
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="desc">Description</Label>
         <Textarea
@@ -97,11 +118,12 @@ function PostForm() {
           className="resize-none"
           {...register("description")}
           disabled={isPending}
-        ></Textarea>
+        />
         {errors?.description && (
           <p className="text-sm text-red-700">{errors.description.message}</p>
         )}
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="content">Content</Label>
         <Textarea
@@ -110,15 +132,23 @@ function PostForm() {
           className="min-h-[250px] resize-none"
           {...register("content")}
           disabled={isPending}
-        ></Textarea>
+        />
         {errors?.content && (
           <p className="text-sm text-red-700">{errors.content.message}</p>
         )}
       </div>
+
       <Button type="submit" className="mt-5 w-full" disabled={isPending}>
-        {isPending ? "Saving Post..." : "Create Post"}
+        {isPending
+          ? isEditing
+            ? "Updating Post..."
+            : "Saving Post..."
+          : isEditing
+            ? "Update Post"
+            : "Create Post"}
       </Button>
     </form>
   );
 }
+
 export default PostForm;
