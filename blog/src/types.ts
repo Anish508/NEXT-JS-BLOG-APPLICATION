@@ -7,24 +7,24 @@ export interface Author {
   email: string;
   createdAt: ISODateString;
   updatedAt: ISODateString;
-  emailVerified: boolean | null;
+  emailVerified: boolean;
 }
 
 export interface Post {
   id: number;
-  title: string | null;
+  title: string;
   content: string;
-  description?: string | null;
+  description?: string;
   slug: string;
   authorId: string;
-  author?: Author | null;
+  author?: Author;
   createdAt: ISODateString;
   updatedAt: ISODateString;
 }
 export interface PostContentProps {
   post: {
     id: number;
-    title: string | null;
+    title: string;
     content: string;
     description?: string | null;
     slug: string;
