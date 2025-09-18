@@ -26,11 +26,12 @@ export default async function profilePage() {
           <div>
             <h1 className="text-3xl font-bold">Your Profile</h1>
           </div>
-          <Button>
-            <Link href="/post/create">
-              <PlusCircle className="h-5 w-5 mr-2">Create Post</PlusCircle>
-            </Link>
-          </Button>
+          <Link href="/post/create">
+            <Button className="w-40 flex items-center justify-center gap-2">
+              <span>Create Post</span>
+              <PlusCircle className="h-5 w-5" />
+            </Button>
+          </Link>
         </div>
         <Card>
           <CardHeader>
@@ -39,11 +40,11 @@ export default async function profilePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <span className="font-medium">Name:</span>
+              <span className="font-medium">Name: </span>
               {session?.user.name}
             </div>
             <div className="space-y-2">
-              <span className="font-medium">Email:</span>
+              <span className="font-medium">Email: </span>
               {session?.user.email}
             </div>
           </CardContent>
